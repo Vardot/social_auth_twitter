@@ -93,8 +93,7 @@ In Drupal:
  19. Navigate to Structure » Block Layout and place a Social Auth login block
      somewhere on the site (if not already placed).
 
-That's it! Edit the app to elevated to the Production environment after the
-implementation has been tested.
+That's it!
 
 
 HOW IT WORKS
