@@ -225,9 +225,10 @@ class TwitterAuthController extends ControllerBase {
     if ($user) {
       // Remove _normal from url to get a bigger profile picture.
       $picture = str_replace('_normal', '', $user->profile_image_url_https);
-      $email = !empty($user->email) ? $user->email : NULL;
-
-      return $this->userAuthenticator->authenticateUser($user->name, $email, $user->id, json_encode($access_token), $picture);
+      $name = $user->screen_name ?? $user->name ?? $user->id;
+      $email = $user->email ?? '';
+      $data = json_decode(json_encode($user), TRUE);
+      return $this->userAuthenticator->authenticateUser($name, $email, $user->id, json_encode($access_token), $picture, $data);
     }
 
     $this->messenger->addError($this->t('You could not be authenticated, please contact the administrator.'));
