@@ -134,7 +134,7 @@ class TwitterAuthController extends ControllerBase {
     $context = new RenderContext();
     $response = $this->renderer->executeInRenderContext($context, function () {
       try {
-        /* @var \Drupal\social_auth_twitter\Plugin\Network\TwitterAuth $network_plugin */
+        /** @var \Drupal\social_auth_twitter\Plugin\Network\TwitterAuth $network_plugin */
         // Creates an instance of the social_auth_twitter Network Plugin.
         $network_plugin = $this->networkManager->createInstance('social_auth_twitter');
 
@@ -146,7 +146,7 @@ class TwitterAuthController extends ControllerBase {
           $this->request->getCurrentRequest()->query->remove('destination');
         }
 
-        /* @var \Abraham\TwitterOAuth\TwitterOAuth $connection */
+        /** @var \Abraham\TwitterOAuth\TwitterOAuth $connection */
         $connection = $network_plugin->getSdk();
 
         if ($connection) {
@@ -185,7 +185,7 @@ class TwitterAuthController extends ControllerBase {
       $response->addCacheableDependency($bubbleable_metadata);
     }
 
-     return $response;
+    return $response;
   }
 
   /**
@@ -201,13 +201,13 @@ class TwitterAuthController extends ControllerBase {
     $oauth_token = $this->twitterManager->getOauthToken();
     $oauth_token_secret = $this->twitterManager->getOauthTokenSecret();
 
-    /* @var \Abraham\TwitterOAuth\TwitterOAuth $client */
+    /** @var \Abraham\TwitterOAuth\TwitterOAuth $client */
     $client = $this->networkManager->createInstance('social_auth_twitter')->getSdk2($oauth_token, $oauth_token_secret);
 
     // Gets the permanent access token.
     $access_token = $client->oauth('oauth/access_token', ['oauth_verifier' => $this->twitterManager->getOauthVerifier()]);
 
-    /* @var \Abraham\TwitterOAuth\TwitterOAuth $connection */
+    /** @var \Abraham\TwitterOAuth\TwitterOAuth $connection */
     $connection = $this->networkManager->createInstance('social_auth_twitter')->getSdk2($access_token['oauth_token'], $access_token['oauth_token_secret']);
     $params = [
       'include_email' => 'true',
