@@ -3,6 +3,7 @@
 namespace Drupal\social_auth_twitter\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Logger\LoggerChannelFactory;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
@@ -13,6 +14,7 @@ use Drupal\social_auth_twitter\TwitterAuthManager;
 use Drupal\social_api\Plugin\NetworkManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Manages requests to Twitter API.
@@ -83,7 +85,9 @@ class TwitterAuthController extends ControllerBase {
    *   SocialAuthDataHandler object.
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   The messenger service.
-   * @param \Drupal\Core\Render\RendererInterface $renderer
+   * @param \Drupal\Core\Logger\LoggerChannelFactory $logger_factory
+   *   Logger factory.
+   * @param \Drupal\Core\Render\RendererInterface|null $renderer
    *   Used to handle metadata for redirection to authentication URL.
    */
   public function __construct(NetworkManager $network_manager,
@@ -92,6 +96,7 @@ class TwitterAuthController extends ControllerBase {
                               RequestStack $request,
                               SocialAuthDataHandler $data_handler,
                               MessengerInterface $messenger,
+                              LoggerChannelFactory $logger_factory,
                               RendererInterface $renderer = NULL) {
     $this->networkManager = $network_manager;
     $this->userAuthenticator = $user_authenticator;
@@ -100,6 +105,8 @@ class TwitterAuthController extends ControllerBase {
     $this->dataHandler = $data_handler;
     $this->messenger = $messenger;
     $this->renderer = $renderer;
+
+    $this->setLoggerFactory($logger_factory);
 
     // Sets the plugin id.
     $this->userAuthenticator->setPluginId('social_auth_twitter');
@@ -123,6 +130,7 @@ class TwitterAuthController extends ControllerBase {
       $container->get('request_stack'),
       $container->get('social_auth.data_handler'),
       $container->get('messenger'),
+      $container->get('logger.factory'),
       $container->get('renderer')
     );
   }
@@ -221,17 +229,26 @@ class TwitterAuthController extends ControllerBase {
     // Gets user information.
     $user = $connection->get("account/verify_credentials", $params);
 
-    // If user information could be retrieved.
-    if ($user) {
+    if ($connection->getLastHttpCode() === Response::HTTP_OK) {
       // Remove _normal from url to get a bigger profile picture.
-      $picture = str_replace('_normal', '', $user->profile_image_url_https);
+      $picture = $user->profile_image_url_https ?? NULL;
+      if (!empty($picture)) {
+        $picture = str_replace('_normal', '', $picture);
+      }
       $name = $user->screen_name ?? $user->name ?? $user->id;
       $email = $user->email ?? '';
       $data = json_decode(json_encode($user), TRUE);
       return $this->userAuthenticator->authenticateUser($name, $email, $user->id, json_encode($access_token), $picture, $data);
     }
+    else {
+      $this->getLogger('social_auth_twitter')->critical("Twitter account credentials verification failed with status code {$connection->getLastHttpCode()}.");
+      $errors = $user->errors ?? [];
+      foreach ($errors as $error) {
+        $this->getLogger('social_auth_twitter')->critical("Error $error->code: $error->message");
+      }
+    }
 
-    $this->messenger->addError($this->t('You could not be authenticated, please contact the administrator.'));
+    $this->messenger->addError($this->t('Authentication failed. Please contact a website administrator.'));
     return $this->redirect('user.login');
   }
 

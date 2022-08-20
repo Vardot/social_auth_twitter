@@ -68,17 +68,34 @@ In [Twitter Developer Portal](https://developer.twitter.com/portal):
 
  8. Click App settings.
 
- 9. Under User authentication settings click Set up.
+ 9. Ensure the app has [Elevated Access](https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api#item0).
 
- 10. Toggle "OAuth 1.0a" (to enable it).
+       1. Click Apply next to the message "Do you need Elevated access for
+          your Project?" if it appears.
 
- 11. Optionally toggle "Request email from users" (to enable it).
+       2. Fill in all required basic info fields and click Next.
 
- 12. Paste the URL copied from Step 2 in the Callback URI / Redirect URL field.
+       3. Fill in all required intended use fields and click Next.
 
- 13. Fill in other required and optional fields as desired.
+       4. Review the settings and click Next.
 
- 14. Click Save.
+       5. Carefully read the Developer Agreement, tick the acknowledgement box
+          and click Submit.
+
+       6. Approval should be immediate. Navigate back to Projects & Apps and
+          click the app name to return to the app settings page.
+
+ 10. Under User authentication settings click Set up.
+
+ 11. Toggle "OAuth 1.0a" (to enable it).
+
+ 12. Optionally toggle "Request email from users" (to enable it).
+
+ 13. Paste the URL copied from Step 2 in the Callback URI / Redirect URL field.
+
+ 14. Fill in other required and optional fields as desired.
+
+ 15. Click Save.
 
 In Drupal:
 
