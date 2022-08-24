@@ -3,7 +3,7 @@
 namespace Drupal\social_auth_twitter\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Logger\LoggerChannelFactory;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
@@ -85,7 +85,7 @@ class TwitterAuthController extends ControllerBase {
    *   SocialAuthDataHandler object.
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   The messenger service.
-   * @param \Drupal\Core\Logger\LoggerChannelFactory $logger_factory
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   Logger factory.
    * @param \Drupal\Core\Render\RendererInterface|null $renderer
    *   Used to handle metadata for redirection to authentication URL.
@@ -96,7 +96,7 @@ class TwitterAuthController extends ControllerBase {
                               RequestStack $request,
                               SocialAuthDataHandler $data_handler,
                               MessengerInterface $messenger,
-                              LoggerChannelFactory $logger_factory,
+                              LoggerChannelFactoryInterface $logger_factory,
                               RendererInterface $renderer = NULL) {
     $this->networkManager = $network_manager;
     $this->userAuthenticator = $user_authenticator;
