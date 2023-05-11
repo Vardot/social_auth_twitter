@@ -32,7 +32,7 @@
     "require": {
         "abraham/twitteroauth": "^3 || ^4",
         "drupal/core": "^9.3 || ^10",
-        "drupal/social_auth": "^3.0"
+        "drupal/social_auth": "^4.0"
     },
     "require-dev": {
         "drupal/coder": "^8.3"
