@@ -7,9 +7,7 @@ use Drupal\Tests\social_auth\Functional\SocialAuthTestBase;
 /**
  * Test that path to authentication route exists in Social Auth Login block.
  *
- * @group social_auth
- *
- * @ingroup social_auth_twitter
+ * @group social_auth_twitter
  */
 class SocialAuthTwitterLoginBlockTest extends SocialAuthTestBase {
 
@@ -18,7 +16,7 @@ class SocialAuthTwitterLoginBlockTest extends SocialAuthTestBase {
    *
    * @var array
    */
-  public static $modules = ['block', 'social_auth_twitter'];
+  protected static $modules = ['block', 'social_auth_twitter'];
 
   /**
    * {@inheritdoc}

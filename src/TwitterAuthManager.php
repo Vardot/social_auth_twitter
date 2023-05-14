@@ -4,6 +4,9 @@ namespace Drupal\social_auth_twitter;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Drupal\social_auth\User\SocialAuthUserInterface;
+use Drupal\social_auth\User\SocialAuthUser;
+
 
 /**
  * Manages the authorization process before getting a long lived access token.

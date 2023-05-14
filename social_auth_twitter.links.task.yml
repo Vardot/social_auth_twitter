@@ -1,4 +1,6 @@
 social_auth_twitter.settings.tab:
   title: 'Twitter'
-  route_name: social_auth_twitter.settings_form
+  route_name: social_auth.network.settings_form
+  route_parameters:
+    network: 'twitter'
   base_route: social_auth.integrations
