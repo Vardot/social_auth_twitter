@@ -30,16 +30,16 @@
         }
     ],
     "require": {
-        "abraham/twitteroauth": "^3 || ^4",
-        "drupal/core": "^9.3 || ^10",
+        "smolblog/oauth2-twitter": "^1.2",
+        "drupal/core": "^10 || ^11",
         "drupal/social_auth": "^4.0"
     },
     "require-dev": {
         "drupal/coder": "^8.3"
     },
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "config": {
-        "sort-packages": true,
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
         }

@@ -2,111 +2,129 @@
 
 namespace Drupal\social_auth_twitter;
 
+use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Utility\Error;
+use Drupal\social_auth\AuthManager\OAuth2Manager;
+use Drupal\social_auth\User\SocialAuthUser;
+use Drupal\social_auth\User\SocialAuthUserInterface;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
- * Manages the authorization process before getting a long lived access token.
+ * Contains all the logic for Twitter OAuth2 authentication.
  */
-class TwitterAuthManager {
-  /**
-   * The session manager.
-   *
-   * @var \Symfony\Component\HttpFoundation\Session\Session
-   */
-  protected $session;
-
-  /**
-   * The current request.
-   *
-   * @var \Symfony\Component\HttpFoundation\Request
-   */
-  protected $request;
+class TwitterAuthManager extends OAuth2Manager {
 
   /**
    * TwitterAuthManager constructor.
-   *
-   * @param \Symfony\Component\HttpFoundation\Session\Session $session
-   *   The session manager.
-   * @param \Symfony\Component\HttpFoundation\RequestStack $request
-   *   Used to get the parameter code returned by Twitter.
    */
-  public function __construct(Session $session, RequestStack $request) {
-    $this->session = $session;
-    $this->request = $request->getCurrentRequest();
+  public function __construct(
+    ConfigFactory $configFactory,
+    LoggerChannelFactoryInterface $logger_factory,
+    RequestStack $request_stack,
+  ) {
+    parent::__construct(
+      $configFactory->get('social_auth_twitter.settings'),
+      $logger_factory,
+      $request_stack->getCurrentRequest(),
+    );
   }
 
   /**
-   * Returns the OAuth Verifier provided by Twitter.
-   *
-   * @return string
-   *   The oauth verifier string.
+   * {@inheritdoc}
    */
-  public function getOauthVerifier() {
-    return $this->request->query->get('oauth_verifier');
+  public function authenticate(): void {
+    $code_verifier = $this->request->getSession()->get('code_verifier');
+    if ($code = $this->request->query->get('code')) {
+      try {
+        $this->setAccessToken($this->client->getAccessToken('authorization_code', [
+          'code' => $code,
+          'code_verifier' => $code_verifier,
+        ]));
+      }
+      catch (\Throwable $e) {
+        $this->loggerFactory->get('social_auth_twitter')
+          ->error('There was an error during authentication. ' . Error::DEFAULT_ERROR_MESSAGE . ' @backtrace_string', Error::decodeException($e));
+      }
+    }
   }
 
   /**
-   * Sets the auth token.
-   *
-   * This oauth token is not the permanent access token for the user. This auth
-   * token is the one returned by Twitter when we first request
-   * /oauth/request_token to then get an oauth_verifier for authorization.
-   *
-   * @param string $oauth_token
-   *   The oauth token.
+   * {@inheritdoc}
    */
-  public function setOauthToken($oauth_token) {
-    $this->session->set('social_auth_twitter_oauth_token', $oauth_token);
+  public function getUserInfo(): SocialAuthUserInterface {
+    if (!$this->user && $access_token = $this->getAccessToken()) {
+      /** @var \Smolblog\OAuth2\Client\Provider\TwitterUser $owner */
+      $owner = $this->client->getResourceOwner($access_token);
+      $this->user = new SocialAuthUser(
+        $owner->getName(),
+        $owner->getId(),
+        $this->getAccessToken(),
+        $owner->getEmail(),
+        $owner->getImageUrl(),
+        $this->getExtraDetails()
+      );
+      $this->user->setFirstName($owner->getName());
+    }
+    return $this->user;
   }
 
   /**
-   * Sets the auth token secret.
-   *
-   * This oauth token secret is not the permanent access token secret for the
-   * user.This auth token is the one returned by Twitter when we first request
-   * /oauth/request_token to then get an oauth_verifier for authorization.
-   *
-   * @param string $oauth_token_secret
-   *   The oauth token secret.
+   * {@inheritdoc}
    */
-  public function setOauthTokenSecret($oauth_token_secret) {
-    $this->session->set('social_auth_twitter_oauth_token_secret', $oauth_token_secret);
+  public function getAuthorizationUrl(): string {
+    // Default scopes required for user authentication.
+    // - tweet.read: Required by X API for basic access.
+    // - users.read: Get user profile information.
+    // - users.email: Get user email address (requires app permission).
+    // - offline.access: Enable refresh tokens for long-term access.
+    $scopes = ['tweet.read', 'users.read', 'users.email', 'offline.access'];
+
+    $extra_scopes = $this->getScopes();
+    if ($extra_scopes) {
+      $scopes = array_merge($scopes, explode(',', $extra_scopes));
+    }
+
+    // Store code verifier to match it later (PKCE support for X/Twitter).
+    $this->request->getSession()->set('code_verifier', $this->client->getPkceVerifier());
+
+    // Returns the URL where user will be redirected.
+    return $this->client->getAuthorizationUrl([
+      'scope' => $scopes,
+    ]);
   }
 
   /**
-   * Gets the auth token.
-   *
-   * This oauth token is not the permanent access token for the user. This auth
-   * token is the one returned by Twitter when we first request
-   * /oauth/request_token to then get an oauth_verifier for authorization.
-   *
-   * @return string
-   *   The oauth token.
+   * {@inheritdoc}
    */
-  public function getOauthToken() {
-    return $this->session->get('social_auth_twitter_oauth_token');
+  public function requestEndPoint(string $method, string $path, ?string $domain = NULL, array $options = []): mixed {
+    if (!$domain) {
+      // Use api.twitter.com for consistency with the smolblog/oauth2-twitter
+      // library. Both api.twitter.com and api.x.com currently work.
+      $domain = 'https://api.twitter.com';
+    }
+
+    $url = $domain . $path;
+
+    $request = $this->client->getAuthenticatedRequest($method, $url, $this->getAccessToken(), $options);
+
+    try {
+      return $this->client->getParsedResponse($request);
+    }
+    catch (IdentityProviderException $e) {
+      $this->loggerFactory->get('social_auth_twitter')
+        ->error('There was an error when requesting ' . $url . '. Exception: ' . $e->getMessage());
+    }
+
+    return NULL;
   }
 
   /**
-   * Gets the auth token secret.
-   *
-   * This oauth token secret is not the permanent access token secret for the
-   * user.This auth token is the one returned by Twitter when we first request
-   * /oauth/request_token to then get an oauth_verifier for authorization.
-   *
-   * @return string
-   *   The oauth token secret.
+   * {@inheritdoc}
    */
-  public function getOauthTokenSecret() {
-    return $this->session->get('social_auth_twitter_oauth_token_secret');
-  }
-
-  /**
-   * Forces the session to be saved and closed.
-   */
-  public function save() {
-    $this->session->save();
+  public function getState(): string {
+    return $this->client->getState();
   }
 
 }
