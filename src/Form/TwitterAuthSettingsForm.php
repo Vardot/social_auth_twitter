@@ -49,7 +49,23 @@ class TwitterAuthSettingsForm extends SocialAuthSettingsForm {
         Enter each endpoint in different lines in the format <em>endpoint</em>|<em>name_of_endpoint</em>.'
     );
 
-    return $form;
+    $form['twitter_settings']['consumer_secret'] = [
+      '#type' => 'textfield',
+      '#required' => TRUE,
+      '#title' => $this->t('Consumer Secret'),
+      '#default_value' => $config->get('consumer_secret'),
+      '#description' => $this->t('Copy the Consumer Secret here'),
+    ];
+
+    $form['twitter_settings']['callback_urls'] = [
+      '#type' => 'textfield',
+      '#disabled' => TRUE,
+      '#title' => $this->t('Callback URLs'),
+      '#description' => $this->t('Copy this value to <em>Callback URLs</em> field of your Twitter App settings.'),
+      '#default_value' => Url::fromRoute('social_auth_twitter.callback')->setAbsolute()->toString(),
+    ];
+
+    return parent::buildForm($form, $form_state, $network);
   }
 
   /**
