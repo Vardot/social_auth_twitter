@@ -4,3 +4,7 @@
 # Vendor paths.
 composer.lock
 vendor
+
+# Yarn paths.
+.yarn/
+.pnp*

@@ -1,0 +1,21 @@
+{
+  "name": "social_auth_twitter",
+  "description": "Social Auth integration for Twitter",
+  "license": "GPL-2.0-or-later",
+  "private": true,
+  "engines": {
+    "yarn": ">= 4.9.3",
+    "node": ">= 20.0"
+  },
+  "packageManager": "yarn@4.9.3",
+  "scripts": {
+    "phpcs": "phpcs --standard=./.phpcs.xml .",
+    "phpcbf": "phpcbf --standard=./.phpcs.xml .",
+    "lint:yaml": "prettier --parser yaml --check '**/*.yml'",
+    "spellcheck": "cspell lint ."
+  },
+  "devDependencies": {
+    "cspell": "^8.16.1",
+    "prettier": "^3.4.2"
+  }
+}

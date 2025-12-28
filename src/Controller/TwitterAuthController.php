@@ -87,17 +87,19 @@ class TwitterAuthController extends ControllerBase {
    *   The messenger service.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   Logger factory.
-   * @param \Drupal\Core\Render\RendererInterface|null $renderer
+   * @param \Drupal\Core\Render\RendererInterface $renderer
    *   Used to handle metadata for redirection to authentication URL.
    */
-  public function __construct(NetworkManager $network_manager,
-                              UserAuthenticator $user_authenticator,
-                              TwitterAuthManager $twitter_manager,
-                              RequestStack $request,
-                              SocialAuthDataHandler $data_handler,
-                              MessengerInterface $messenger,
-                              LoggerChannelFactoryInterface $logger_factory,
-                              ?RendererInterface $renderer = NULL) {
+  public function __construct(
+    NetworkManager $network_manager,
+    UserAuthenticator $user_authenticator,
+    TwitterAuthManager $twitter_manager,
+    RequestStack $request,
+    SocialAuthDataHandler $data_handler,
+    MessengerInterface $messenger,
+    LoggerChannelFactoryInterface $logger_factory,
+    RendererInterface $renderer,
+  ) {
     $this->networkManager = $network_manager;
     $this->userAuthenticator = $user_authenticator;
     $this->twitterManager = $twitter_manager;
@@ -113,10 +115,6 @@ class TwitterAuthController extends ControllerBase {
 
     // Sets the session keys to nullify if user could not logged in.
     $this->userAuthenticator->setSessionKeysToNullify(['access_token']);
-
-    if (!$this->renderer) {
-      $this->renderer = \Drupal::service('renderer');
-    }
   }
 
   /**
