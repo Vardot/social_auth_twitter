@@ -3,6 +3,7 @@
 namespace Drupal\social_auth_twitter\Form;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\social_auth\Form\SocialAuthSettingsForm;
 use Drupal\social_auth\Plugin\Network\NetworkInterface;
 
@@ -35,6 +36,8 @@ class TwitterAuthSettingsForm extends SocialAuthSettingsForm {
     /** @var \Drupal\social_auth\Plugin\Network\NetworkInterface $network */
     $network = $this->networkManager->createInstance('social_auth_twitter');
     $form = parent::buildForm($form, $form_state, $network);
+
+    $config = $this->config('social_auth_twitter.settings');
 
     $form['network']['advanced']['scopes']['#description'] =
       $this->t('Define any additional scopes to be requested, separated by a comma.<br>
