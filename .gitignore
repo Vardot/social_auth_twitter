@@ -1,6 +1,11 @@
-# IDE/sysem paths.
+# IDE/system paths.
 .idea
 
 # Vendor paths.
 composer.lock
 vendor
+
+# Yarn paths.
+.yarn/
+node_modules/
+.pnp.*
