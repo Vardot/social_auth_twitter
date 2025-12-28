@@ -97,7 +97,7 @@ class TwitterAuthController extends ControllerBase {
                               SocialAuthDataHandler $data_handler,
                               MessengerInterface $messenger,
                               LoggerChannelFactoryInterface $logger_factory,
-                              RendererInterface $renderer = NULL) {
+                              ?RendererInterface $renderer = NULL) {
     $this->networkManager = $network_manager;
     $this->userAuthenticator = $user_authenticator;
     $this->twitterManager = $twitter_manager;
