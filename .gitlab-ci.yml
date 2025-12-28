@@ -7,7 +7,8 @@ include:
       - "/includes/include.drupalci.workflows.yml"
 
 variables:
-  DRUPAL_CORE: "10.3"
+  DRUPAL_CORE: "^10"
+  _TARGET_CORE: "^10"
 
 composer-lint:
   allow_failure: true
