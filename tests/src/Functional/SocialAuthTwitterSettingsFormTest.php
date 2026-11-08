@@ -18,7 +18,7 @@ class SocialAuthTwitterSettingsFormTest extends SocialAuthTestBase {
    *
    * @var array
    */
-  public static $modules = ['social_auth_twitter'];
+  protected static $modules = ['social_auth_twitter'];
 
   /**
    * {@inheritdoc}

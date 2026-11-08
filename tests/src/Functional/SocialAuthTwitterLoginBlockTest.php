@@ -18,7 +18,7 @@ class SocialAuthTwitterLoginBlockTest extends SocialAuthTestBase {
    *
    * @var array
    */
-  public static $modules = ['block', 'social_auth_twitter'];
+  protected static $modules = ['block', 'social_auth_twitter'];
 
   /**
    * {@inheritdoc}

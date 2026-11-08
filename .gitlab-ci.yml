@@ -8,14 +8,31 @@ include:
 
 variables:
   DRUPAL_CORE: "^10"
-  _TARGET_CORE: "^10"
 
+composer:
+  variables:
+    # _TARGET_CORE is deprecated; the composer job takes DRUPAL_CORE itself.
+    DRUPAL_CORE: "^10"
+
+.composer-base:
+  variables:
+    # Drupal core's own Yarn 4.9.1 would read the project .yarnrc.yml (Yarn >= 4.14 keys) too.
+    YARN_RC_FILENAME: .yarnrc.core.yml
+    YARN_NODE_LINKER: node-modules
+stylelint:
+  variables:
+    # Drupal core's own Yarn 4.9.1 would read the project .yarnrc.yml (Yarn >= 4.14 keys) too.
+    YARN_RC_FILENAME: .yarnrc.core.yml
+    YARN_NODE_LINKER: node-modules
 composer-lint:
   allow_failure: true
 cspell:
   allow_failure: true
 eslint:
   allow_failure: true
+  variables:
+    # The project .eslintrc.json extends airbnb-base: resolve it from Drupal core's node_modules.
+    NODE_PATH: $CI_PROJECT_DIR/web/core/node_modules
 phpcs:
   allow_failure: true
 phpstan:
