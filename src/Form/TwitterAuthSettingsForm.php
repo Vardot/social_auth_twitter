@@ -3,7 +3,6 @@
 namespace Drupal\social_auth_twitter\Form;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\social_auth\Form\SocialAuthSettingsForm;
 use Drupal\social_auth\Plugin\Network\NetworkInterface;
 
@@ -37,8 +36,6 @@ class TwitterAuthSettingsForm extends SocialAuthSettingsForm {
     $network = $this->networkManager->createInstance('social_auth_twitter');
     $form = parent::buildForm($form, $form_state, $network);
 
-    $config = $this->config('social_auth_twitter.settings');
-
     $form['network']['advanced']['scopes']['#description'] =
       $this->t('Define any additional scopes to be requested, separated by a comma.<br>
         The scopes \'tweet.read\', \'users.read\', \'users.email\', and \'offline.access\' are added by default and always requested.<br>
@@ -52,23 +49,15 @@ class TwitterAuthSettingsForm extends SocialAuthSettingsForm {
         Enter each endpoint in different lines in the format <em>endpoint</em>|<em>name_of_endpoint</em>.'
     );
 
-    $form['twitter_settings']['consumer_secret'] = [
-      '#type' => 'textfield',
-      '#required' => TRUE,
-      '#title' => $this->t('Consumer Secret'),
-      '#default_value' => $config->get('consumer_secret'),
-      '#description' => $this->t('Copy the Consumer Secret here'),
-    ];
-
     $form['twitter_settings']['callback_urls'] = [
       '#type' => 'textfield',
       '#disabled' => TRUE,
       '#title' => $this->t('Callback URLs'),
       '#description' => $this->t('Copy this value to <em>Callback URLs</em> field of your Twitter App settings.'),
-      '#default_value' => Url::fromRoute('social_auth_twitter.callback')->setAbsolute()->toString(),
+      '#default_value' => $network->getCallbackUrl()->setAbsolute()->toString(),
     ];
 
-    return parent::buildForm($form, $form_state, $network);
+    return $form;
   }
 
   /**
